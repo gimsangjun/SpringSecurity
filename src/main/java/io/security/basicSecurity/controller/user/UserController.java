@@ -38,9 +38,8 @@ public class UserController {
         ModelMapper modelMapper = new ModelMapper();
         // modelmapper로 Dto를 전환.
         Account account = modelMapper.map(accountDto, Account.class);
-        account.setPassword( passwordEncoder.encode(account.getPassword()) );
+        account.setPassword( passwordEncoder.encode(account.getPassword()));
         userService.createUser(account);
-
         return "redirect:/";
     }
 
