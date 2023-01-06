@@ -5,12 +5,11 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.io.Serializable;
 
 @Entity
 @Data
-
-public class Account implements Serializable {
+// DB에 저장하기 위한 entity
+public class Account {
 
     @Id
     @GeneratedValue

@@ -15,16 +15,19 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-devtools'
 
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5' // 타임리프 springsecurity 확장팩
 	implementation 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.modelmapper:modelmapper:3.1.0'
+
+	// Spring Security 추가 + jwt인증, 5.7이상부터는 WebSecurityConfigurerAdapter지원안함.
+	implementation 'org.springframework.boot:spring-boot-starter-security:2.5.6'
+
 }
 
 tasks.named('test') {
