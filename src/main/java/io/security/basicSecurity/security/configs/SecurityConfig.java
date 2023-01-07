@@ -1,9 +1,13 @@
 package io.security.basicSecurity.security.configs;
 
+import io.security.basicSecurity.security.provider.CustomAuthenticationProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -19,20 +23,37 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        String password = passwordEncoder().encode("1111");
+//        // DB에 저장하는것이 아닌 메모리에 저장. 테스트용도
+//        auth.inMemoryAuthentication().withUser("user").password(password).roles("USER");
+//        // ADMIN이 더 높은 사용자 권한이라는것을 모름, 그냥 roles은 그냥 단순한 문자열임. 그래서 리스트 형태로 넣어주는거임.
+//        // 나중에 계층적으로 role을 설정하는것을 할거임.
+//        auth.inMemoryAuthentication().withUser("manager").password(password).roles("USER","MANAGER");
+//        auth.inMemoryAuthentication().withUser("admin").password(password).roles("USER","MANAGER","ADMIN");
+//    }
+
+
+    // 커스텀한 UserDetailsService 인데, CustomUserDetailsService에서 @Service("userDetailsService")  이런식으로 Bean으로 등록했기때문에 이런식으로 가능한듯.
+    // @Autowired
+    // UserDetailsService userDetailsService;
+
+    // 인증객체에 추가정보에 담고 싶을때 사용
+    @Autowired
+    private AuthenticationDetailsSource authenticationDetailsSource;
+
+    // 내가만든 인증처리 방법을 등록
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        String password = passwordEncoder().encode("1111");
-        // DB에 저장하는것이 아닌 메모리에 저장. 테스트용도
-        auth.inMemoryAuthentication().withUser("user").password(password).roles("USER");
-        // ADMIN이 더 높은 사용자 권한이라는것을 모름, 그냥 roles은 그냥 단순한 문자열임. 그래서 리스트 형태로 넣어주는거임.
-        // 나중에 계층적으로 role을 설정하는것을 할거임.
-        auth.inMemoryAuthentication().withUser("manager").password(password).roles("USER","MANAGER");
-        auth.inMemoryAuthentication().withUser("admin").password(password).roles("USER","MANAGER","ADMIN");
+        // 내가 만든 UserDetailsServices를 사용하라고 알려주는것.
+        // auth.userDetailsService(userDetailsService); // Provider에서 사용하기 때문에 주석.
+        auth.authenticationProvider(authenticationProvider()); // 내가 만든 Provider사용
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationProvider authenticationProvider(){
+        return new CustomAuthenticationProvider();
     }
 
     // Web ignoring설정.
@@ -41,6 +62,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Override
@@ -54,7 +80,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
         .and()
-                .formLogin();
+                .formLogin()
+                .loginPage("/login")
+                // 로그인 페이지 내에서 실제 로그인 처리 실행 경로를 의미
+                // 스프링 시큐리티 기본 로그인 실행 경로는 /login 이므로, 로그인 커스텀페이지를 줄경우 따로 처리해야함.
+                .loginProcessingUrl("/login_proc")
+                .authenticationDetailsSource(authenticationDetailsSource) // 내가 만든 authenticationDetailsSource 등록
+                .defaultSuccessUrl("/")
+                .permitAll()
+        ;
     }
 
 }
