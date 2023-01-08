@@ -1,5 +1,6 @@
 package io.security.basicSecurity.security.configs;
 
+import io.security.basicSecurity.security.handler.CustomAccessDeniedHandler;
 import io.security.basicSecurity.security.provider.CustomAuthenticationProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
+import javax.servlet.http.HttpServletRequest;
 
 
 @Configuration
@@ -39,10 +45,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // @Autowired
     // UserDetailsService userDetailsService;
 
-    // 인증객체에 추가정보에 담고 싶을때 사용
-    @Autowired
-    private AuthenticationDetailsSource authenticationDetailsSource;
 
+    @Autowired // 인증객체에 추가정보에 담고 싶을때 사용
+    private AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
+    @Autowired // 로그인 인증후 어떻게 할것인지 커스텀
+    private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    @Autowired
+    private AuthenticationFailureHandler customAuthenticationFailureHandler;
     // 내가만든 인증처리 방법을 등록
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -73,7 +82,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/","user/login/**","/users").permitAll()
+                .antMatchers("/","/users", "user/login/**","/login*").permitAll()
                 .antMatchers("/mypage").hasRole("USER")
                 .antMatchers("/messages").hasRole("MANAGER")
                 .antMatchers("/config").hasRole("ADMIN")
@@ -85,10 +94,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 로그인 페이지 내에서 실제 로그인 처리 실행 경로를 의미
                 // 스프링 시큐리티 기본 로그인 실행 경로는 /login 이므로, 로그인 커스텀페이지를 줄경우 따로 처리해야함.
                 .loginProcessingUrl("/login_proc")
-                .authenticationDetailsSource(authenticationDetailsSource) // 내가 만든 authenticationDetailsSource 등록
-                .defaultSuccessUrl("/")
+                // 내가 만든 authenticationDetailsSource 등록
+                .authenticationDetailsSource(authenticationDetailsSource)
+                 //.defaultSuccessUrl("/")
+                // 내가 만든 customAuthenticationSuccessHandler 등록
+                .successHandler(customAuthenticationSuccessHandler)
+                // 내가 만든 customAuthenticationFailureHandler 등록
+                .failureHandler(customAuthenticationFailureHandler)
                 .permitAll()
+        .and()
+                // 내가 만든 customAccessDeniedHandler 등록
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler());
+
         ;
+    }
+
+    @Bean // 커스텀 인증거부 처리 Access Denied
+    public AccessDeniedHandler accessDeniedHandler() {
+        CustomAccessDeniedHandler accessDeniedHandler = new CustomAccessDeniedHandler();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
     }
 
 }

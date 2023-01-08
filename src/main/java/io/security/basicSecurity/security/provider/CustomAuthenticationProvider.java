@@ -32,7 +32,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         AccountContext accountContext = (AccountContext)userDetailsService.loadUserByUsername(username);
 
         // 비밀번호가 일치하지 않으면 BadCredentialException
-        if(passwordEncoder.matches(password,accountContext.getPassword())){
+        if(!passwordEncoder.matches(password,accountContext.getPassword())){
             throw new BadCredentialsException("BadCredentialsException");
         }
 
