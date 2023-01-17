@@ -5,19 +5,19 @@ import io.security.basicSecurity.app.user.dto.SignUpDTO;
 import io.security.basicSecurity.app.user.repository.UserRepository;
 import io.security.basicSecurity.enums.role.UserRole;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @Transactional // TODO : 이것의 의미는?
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional // TODO : 이것의 의미는?
     public User signUp(final SignUpDTO signUpDTO){

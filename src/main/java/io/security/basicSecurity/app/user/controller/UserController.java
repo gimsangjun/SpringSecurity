@@ -11,6 +11,7 @@ import io.security.basicSecurity.app.user.service.UserService;
 import io.security.basicSecurity.enums.role.UserRole;
 import io.security.basicSecurity.jwt.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class UserController {
@@ -30,7 +32,7 @@ public class UserController {
     private final JwtUserDetailsService userDetailsService;
     // jwt 토큰 관련 도구
     private final JwtTokenUtils jwtTokenUtils;
-    
+
     /** 회원가입
      *  모든 사용자가 접근 가능
      *  @return JWT Token을 만들어서 리턴.

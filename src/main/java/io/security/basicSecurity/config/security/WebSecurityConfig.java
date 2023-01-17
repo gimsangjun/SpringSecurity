@@ -16,10 +16,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
 @EnableWebSecurity // 기본적인 web보안을 활성화 하겠다는 의미
 @EnableGlobalMethodSecurity(prePostEnabled = true) // 이것의 의미는?
 @RequiredArgsConstructor
@@ -29,8 +27,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsService jwtUserDetailsService; // 이렇게 이름을 지을경우 JwtUserDetailsService를 가져오나?
     private final JwtRequestFilter jwtRequestFilter;
 
-    @Autowired // 이게 붙은 이유는?
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // configure AuthenticationManager so that it knows from where to load
         // user for matching credentials
         // Use BCryptPasswordEncoder
@@ -53,15 +51,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 );
     }
 
+    @Bean
     @Override // 의문 : 이게 왜 필요한지? -> 먼저, AuthenticationManager 를 외부에서 사용 하기 위해
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 // 아래의 요청들은 토큰없이도 가능하도록
-                .authorizeRequests().antMatchers("/authenticate","signUp").permitAll()
+                .authorizeRequests().antMatchers("/authenticate","/signUp").permitAll()
                 // 위를 제외한 다른 요청들은 인증이 필요
                 .anyRequest().authenticated()
                 .and()

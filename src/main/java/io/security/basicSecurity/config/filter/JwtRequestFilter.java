@@ -33,6 +33,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtils jwtTokenUtils;
 
+    // TODO: 모든 request가 이 필터를 통과해서, 토큰이 필요 없는 URL요청에도 통과됨.
+    // TODO: 인증이 필요한 URL에 요청을 할 때,  인증이 없으면 오류메시지를 보내야되는데 어디서 처리해야하는지 모르겠음/
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         // Postman에서는 Key: "Authorization" , Value : "Bearer 토큰값" 임.
@@ -40,6 +42,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String email = null;
         String jwtToken = null;
+
+        log.info("요청 URL={}",request.getRequestURL());
 
         // "Authorization" 헤더가 있고, 헤더 Value가 Bearer로 시작하면
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")){

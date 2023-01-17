@@ -20,7 +20,7 @@ public class JwtTokenUtils {
     private static final long JWT_TOKEN_VALIDITY =  5*60*60;
 
     @Value("${jwt.secret}")
-    private static String secret;
+    private String secret;
 
     /**
      * 토큰의 구조
@@ -71,7 +71,6 @@ public class JwtTokenUtils {
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY*1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
@@ -94,7 +93,9 @@ public class JwtTokenUtils {
         return header.split(" ")[1];
     }
 
-
-
-
+    // TODO: 토큰헤더 추가해야됨
+    /**
+     *      "alg" : "HS256"
+     *      "typ" : "JWT"
+      */
 }
